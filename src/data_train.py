@@ -2620,6 +2620,8 @@ if __name__ == '__main__':
     parser.add_argument('--new_hay_insert', help='Boolean. new hay insertion experiment', action='store_true')
     parser.add_argument('--hard_coded_ckpt', type=int, help="Integer. hard-code what ckpt to use for needle plots", default=None)
     parser.add_argument('--multi_cut_val', help='Boolean. run the multi cut validation experiment data gen', action='store_true')
+    parser.add_argument('--dataset_typ', type=str, help='Name of the datasource to use', default=None)
+
 
 
 
@@ -2699,6 +2701,8 @@ if __name__ == '__main__':
     hard_coded_ckpt = args.hard_coded_ckpt
     print("multi_cut_val arg", args.multi_cut_val)
     multi_cut_val = args.multi_cut_val
+    print("dataset_typ arg", args.dataset_typ)
+    dataset_typ = args.dataset_typ
 
 
 
@@ -2764,6 +2768,19 @@ if __name__ == '__main__':
     config.override("only_beg", only_beg) # set the only_beg in the config object
     if config.only_beg:
         print("only plotting the beginning evals\n\n\n")
+
+    if dataset_typ is not None:
+        if config.datasource == "val":
+            config.override("val_dataset_typ", dataset_typ)
+
+            print(f"setting val_dataset_typ to {dataset_typ} for {config.datasource} datasource")
+
+        elif config.datasource == "train" or config.datasource == "backstory_train":
+            config.override("dataset_typ", dataset_typ)
+
+            print(f"setting dataset_typ to {dataset_typ} for {config.datasource} datasource")
+
+        
 
     if zero_cut:
         config.override("multi_sys_trace", True)
