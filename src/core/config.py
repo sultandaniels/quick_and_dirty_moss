@@ -27,7 +27,7 @@ class Config(object, metaclass=Singleton):
     nx = 5
     ny = 5
     n_noise = 1
-    num_traces = {"train": 1, "val": 1}
+    num_traces = {"train": 1, "val": 1000}
     changing = False #used only for plotting
 
     #mem_suppress experiment settings
