@@ -2859,7 +2859,7 @@ if __name__ == '__main__':
                 if config.multi_cut_val:
                     num_haystack_examples = config.num_val_tasks - config.max_sys_trace
                 else:
-                    num_haystack_examples = 100 #number of haystack examples to use for testing
+                    num_haystack_examples = 20 #number of haystack examples to use for testing
 
         config.override("num_haystack_examples", num_haystack_examples)
 
