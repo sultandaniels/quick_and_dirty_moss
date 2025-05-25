@@ -2047,7 +2047,7 @@ def set_config_params(config, model_name):
         config.override("nx", 5)
         config.override("ny", 5)
         config.override("n_noise", 1)
-        config.override("num_traces", {"train": 1, "val": 1000})
+        config.override("num_traces", {"train": 1, "val": 100})
         config.override("changing", False)  # used only for plotting
 
         #mem_suppress experiment settings
@@ -2838,7 +2838,7 @@ if __name__ == '__main__':
                 if config.multi_cut_val:
                     num_haystack_examples = config.num_val_tasks - config.max_sys_trace
                 else:
-                    num_haystack_examples = 50 #number of haystack examples to use for testing
+                    num_haystack_examples = 20 #number of haystack examples to use for testing
 
         config.override("num_haystack_examples", num_haystack_examples)
 
@@ -2890,8 +2890,8 @@ if __name__ == '__main__':
                 num_sys_haystacks = [2]
                 
             else:
-                num_sys_haystacks = list(range(1,last_haystack_len+1))
-                # num_sys_haystacks = [19]
+                # num_sys_haystacks = list(range(1,last_haystack_len+1))
+                num_sys_haystacks = [5]
 
             print("num_sys_haystacks:", num_sys_haystacks)
 
