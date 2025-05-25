@@ -219,4 +219,4 @@ if __name__ == "__main__":
 
     config.override("multi_cut_val", multi_cut_val)
     
-    collect_data(config, "/data/shared/ICL_Kalman_Experiments/train_and_test_data/ident", only, train_mix_dist, opposite_ortho=opposite_ortho)
+    collect_data(config, "/data/shared/ICL_Kalman_Experiments/train_and_test_data/ortho_haar", only, train_mix_dist, opposite_ortho=opposite_ortho)
