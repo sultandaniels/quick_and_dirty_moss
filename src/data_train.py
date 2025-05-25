@@ -2874,8 +2874,8 @@ if __name__ == '__main__':
             ckpt_pred_steps = gen_ckpt_pred_steps(model_name)
 
             # steps_in = [1,2,3,5,10]
-            steps_in = [1,2,3,7,8]
-            # steps_in = list(range(1,9))
+            # steps_in = [1,2,3,7,8]
+            steps_in = list(range(1,9))
 
             colors=['#000000', '#005CAB', '#E31B23', '#FFC325', '#00A651', '#9B59B6']
         
