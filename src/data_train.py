@@ -2573,6 +2573,19 @@ def plot_needles(config, num_sys, output_dir, model_dir, experiment, num_haystac
         haystack_plots_needle_full(config, num_sys, output_dir, pred_ckpt_step, steps_in, colors, compute_more=make_preds)
     
     return make_preds
+
+def update_dataset_typ(config, dataset_typ):
+    if dataset_typ is not None:
+        if config.datasource == "val":
+            config.override("val_dataset_typ", dataset_typ)
+
+            print(f"setting val_dataset_typ to {dataset_typ} for {config.datasource} datasource")
+
+        elif config.datasource == "train" or config.datasource == "backstory_train":
+            config.override("dataset_typ", dataset_typ)
+
+            print(f"setting dataset_typ to {dataset_typ} for {config.datasource} datasource")
+
     
 
 
@@ -2769,17 +2782,6 @@ if __name__ == '__main__':
     if config.only_beg:
         print("only plotting the beginning evals\n\n\n")
 
-    if dataset_typ is not None:
-        if config.datasource == "val":
-            config.override("val_dataset_typ", dataset_typ)
-
-            print(f"setting val_dataset_typ to {dataset_typ} for {config.datasource} datasource")
-
-        elif config.datasource == "train" or config.datasource == "backstory_train":
-            config.override("dataset_typ", dataset_typ)
-
-            print(f"setting dataset_typ to {dataset_typ} for {config.datasource} datasource")
-
         
 
     if zero_cut:
@@ -2827,6 +2829,8 @@ if __name__ == '__main__':
     if (not (train_conv or multi_haystack)) and (make_preds or saved_preds or resume_train):
 
         output_dir, ckpt_dir, experiment_name = set_config_params(config, model_name)
+        update_dataset_typ(config, args.dataset_typ)
+
         print(f"output_dir: {output_dir}")
         
         ckpt_path = "/data/shared/ICL_Kalman_Experiments/model_checkpoints/GPT2/250501_221900.f583e5_multi_sys_trace_ortho_haar_state_dim_5_ident_C_lr_1.4766370475008905e-05_num_train_sys_40000/checkpoints/step=135000.ckpt" #normal training run
@@ -2860,6 +2864,7 @@ if __name__ == '__main__':
         config.override("num_haystack_examples", num_haystack_examples)
 
         output_dir, ckpt_dir, experiment_name = set_config_params(config, model_name)
+        update_dataset_typ(config, args.dataset_typ)
 
         if multi_cut_val: #set the validation data to be in the format of the training data
             config.override("num_val_tasks", 40000)
