@@ -189,6 +189,7 @@ if __name__ == "__main__":
     parser.add_argument('--train_mix_dist', help='Boolean. generate training data from gaussian, uppertriA, and rotdiagA', action='store_true')
     parser.add_argument('--train_mix_state_dim', help='Boolean. generate training data from a mixture of state dimensions', action='store_true')
     parser.add_argument('--opposite_ortho', help='Boolean. generate training data from opposite orthogonal systems', action='store_true')
+    parser.add_argument('--multi_cut_val', help='Boolean. run the multi cut validation experiment data gen', action='store_true')
 
 
     # Parse the arguments
@@ -198,10 +199,12 @@ if __name__ == "__main__":
     print("train_mix_dist:", args.train_mix_dist)
     print("train_mix_state_dim:", args.train_mix_state_dim)
     print("opposite_ortho:", args.opposite_ortho)
+    print("multi_cut_val:", args.multi_cut_val)
 
     train_mix_dist = args.train_mix_dist
     train_mix_state_dim = args.train_mix_state_dim
     opposite_ortho = args.opposite_ortho
+    multi_cut_val = args.multi_cut_val
 
     # Now you can use the flag
     if args.val:
@@ -212,5 +215,7 @@ if __name__ == "__main__":
         only = ""
 
     config = Config()
+
+    config.override("multi_cut_val", multi_cut_val)
     
     collect_data(config, "/data/shared/ICL_Kalman_Experiments/train_and_test_data/ortho_haar", only, train_mix_dist, opposite_ortho=opposite_ortho)
