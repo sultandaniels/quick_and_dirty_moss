@@ -21,23 +21,50 @@ from check_ecdf import get_empirical_cdf
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using device:", device)
 
-def get_seg_starts_per_config(experiment, valA, valC, state_dim, ckpt, print_seg_starts=False, nope=False, needle=False, fin_seg_ext=False, haystack_len=19, train_conv=False, datasource="val", paren_swap=False, fix_needle=False, opposite_ortho=False, irrelevant_tokens=False, same_tokens=False, new_hay_insert=False):
-    # load the sys choices etc
-    errs_dir = "../outputs/GPT2" + ("_NoPE" if nope else "") + "/" + experiment + f"/prediction_errors{valC}_step={ckpt}.ckpt"
-    # + ("train_conv_" if needle else "")
-    errs_loc = errs_dir + f"/" + ("train_conv_" if train_conv else "") + ("single_system_" if not needle else "") + (f"needle_haystack_len_{haystack_len}_{datasource}_" if needle else "") + ("fin_seg_ext_" if needle and fin_seg_ext else "") + f"{valA}_state_dim_{state_dim}_" + ("fix_needle_" if fix_needle else "") + ("opposite_ortho_" if opposite_ortho else "") + ("new_hay_insert_" if new_hay_insert else "") + ("irrelevant_tokens_" if irrelevant_tokens else "") + ("same_tokens_" if same_tokens else "") + ("paren_swap_" if paren_swap else "")  + f"sys_choices_sys_dict_tok_seg_lens_seg_starts" + ("_example_0" if needle else "") + ".pkl"
+# def get_seg_starts_per_config(experiment, valA, valC, state_dim, ckpt, print_seg_starts=False, nope=False, needle=False, fin_seg_ext=False, haystack_len=19, train_conv=False, datasource="val", paren_swap=False, fix_needle=False, opposite_ortho=False, irrelevant_tokens=False, same_tokens=False, new_hay_insert=False):
+#     # load the sys choices etc
+#     errs_dir = "../outputs/GPT2" + ("_NoPE" if nope else "") + "/" + experiment + f"/prediction_errors{valC}_step={ckpt}.ckpt"
+#     # + ("train_conv_" if needle else "")
+#     errs_loc = errs_dir + f"/" + ("train_conv_" if train_conv else "") + ("single_system_" if not needle else "") + (f"needle_haystack_len_{haystack_len}_{datasource}_" if needle else "") + ("fin_seg_ext_" if needle and fin_seg_ext else "") + f"{valA}_state_dim_{state_dim}_" + ("fix_needle_" if fix_needle else "") + ("opposite_ortho_" if opposite_ortho else "") + ("new_hay_insert_" if new_hay_insert else "") + ("irrelevant_tokens_" if irrelevant_tokens else "") + ("same_tokens_" if same_tokens else "") + ("paren_swap_" if paren_swap else "")  + f"sys_choices_sys_dict_tok_seg_lens_seg_starts" + ("_example_0" if needle else "") + ".pkl"
 
-    if not os.path.exists(errs_loc):
-        print(f"errs_loc {errs_loc} does not exist")
-        return None
-    else:
-        with open(errs_loc, "rb") as f:
-            data = pickle.load(f)
-            seg_starts_per_config = data['seg_starts_per_config']
-            if print_seg_starts:
-                print(f"seg_starts_per_config: {seg_starts_per_config}")
+#     if not os.path.exists(errs_loc):
+#         print(f"errs_loc {errs_loc} does not exist")
+#         return None
+#     else:
+#         with open(errs_loc, "rb") as f:
+#             data = pickle.load(f)
+#             seg_starts_per_config = data['seg_starts_per_config']
+#             if print_seg_starts:
+#                 print(f"seg_starts_per_config: {seg_starts_per_config}")
                 
-        return seg_starts_per_config
+#         return seg_starts_per_config
+
+def get_seg_starts_per_config(config, ex=0):
+    if config.datasource == "train_systems" or config.datasource == "backstory_train" or config.datasource == "train":
+        dataset_typ = config.dataset_typ
+    elif config.datasource == "val":
+        dataset_typ = config.val_dataset_typ
+
+    # path to interleaved data file
+    if config.needle_in_haystack:
+        interleaving = f"haystack_len_{config.num_sys_haystack}"
+    else:
+        interleaving = f"multi_cut"
+
+    interleave_traces_dict_path = os.path.join(f"/data/shared/ICL_Kalman_Experiments/train_and_test_data/{dataset_typ}/{config.datasource}_interleaved_traces_{dataset_typ}{config.C_dist}_{interleaving}.pkl")
+
+    if os.path.exists(interleave_traces_dict_path):
+        with open(interleave_traces_dict_path, "rb") as f:
+            interleave_traces_dict = pickle.load(f)
+            seg_starts_per_config_per_example = interleave_traces_dict["seg_starts_per_config"]
+
+        if config.needle_in_haystack:
+            seg_starts_per_config = seg_starts_per_config_per_example[0] # all of the examples have the same segment starts for needle in haystack tests
+
+        else:
+            seg_starts_per_config = seg_starts_per_config_per_example[ex] #get the segment starts for the example ex
+
+    return seg_starts_per_config
 
 def train_conv_plots(experiments, trainAs, kal_ckpt, valA, C_dist, num_val_systems, compute_more_ckpts=False, ind=250, min_ckpt=79, max_ckpt=79000, interval=79, nx=10, needle_in_haystack=False, single_system=False, max_ir_len=3, nope=False, batch_size=512, gpus=1, zero_cut=False):
     num_preds = 3+(3*2) #len(experiments) #number of predictors to plot

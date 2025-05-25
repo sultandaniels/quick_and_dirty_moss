@@ -458,7 +458,7 @@ def compute_quartiles_ckpt(config, model_name, steps_in, model_dir, experiment, 
 
             if len(pred_ckpts) == 0:
                 #get seg_starts
-                seg_starts_per_conf = get_seg_starts_per_config(experiment, config.val_dataset_typ, config.C_dist, config.nx, ckpt_step, print_seg_starts=True, nope=nope, needle=True, haystack_len=haystack_len, train_conv=True, datasource=config.datasource, paren_swap=config.paren_swap, fix_needle=config.fix_needle, opposite_ortho=config.opposite_ortho, irrelevant_tokens=config.irrelevant_tokens, same_tokens=config.same_tokens, new_hay_insert=config.new_hay_insert)
+                seg_starts_per_conf = get_seg_starts_per_config(config)
 
             quartiles = comp_quartiles(config, err_lss_examples, ratio=rat, train_conv=True, kal_err=kal_err)
 
