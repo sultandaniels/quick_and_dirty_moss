@@ -56,8 +56,6 @@ def wandb_train(config, config_dict, model, ckpt_dir, train_mix_dist=False, trai
 
 def preds_thread(config, ckpt_path, make_preds, resume_train, train_conv, logscale, tf, output_dir, ys=None, sim_objs=None, train_mix_dist=False, train_mix_state_dim=False, run_kf_ols=True):
 
-    print("In preds_thread")
-
     device = "cuda" if torch.cuda.is_available() else "cpu"  # check if cuda is available
 
     # create prediction plots

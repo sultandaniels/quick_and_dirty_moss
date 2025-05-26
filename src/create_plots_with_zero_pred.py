@@ -1880,8 +1880,6 @@ def compute_errors_needle_or_multi_cut(config, model, sim_objs, errs_dir, errs_l
 
     print(f"\n\nLoading interleaved traces from {interleave_traces_dict_path}\n\n")
 
-    raise Exception("This function is not implemented for multi-cut or needle in haystack yet. Please use the appropriate function for your configuration.")
-
     with open(interleave_traces_dict_path, "rb") as f:
         interleave_traces_dict = pickle.load(f)
         orig_multi_sys_ys = interleave_traces_dict["multi_sys_ys"]
@@ -2173,11 +2171,8 @@ def save_preds(run_deg_kf_test, config, model, train_conv, tf, ys, sim_objs, out
     os.makedirs(errs_dir, exist_ok=True)
 
     if train_conv and not config.multi_sys_trace:
-        print("here in compute_errors_conv")
         err_lss, irreducible_error = compute_errors_conv(config)
     elif train_conv and config.multi_sys_trace:
-
-        print("here in needle_in_haystack_preds first cond")
 
         needle_in_haystack_preds(config, model, ckpt_steps, parent_parent_dir, errs_dir, train_conv, ys, sim_objs, run_kf_ols=run_kf_ols)
         return None
@@ -2186,7 +2181,6 @@ def save_preds(run_deg_kf_test, config, model, train_conv, tf, ys, sim_objs, out
 
     elif not train_conv and config.multi_sys_trace:
 
-        print("here in multi_sys_trace preds")
         if not config.needle_in_haystack:
             err_lss, sys_choices_per_config, sys_dict_per_config, tok_seg_lens_per_config, seg_starts_per_config = compute_errors_multi_sys(config, tf)
             
@@ -2201,15 +2195,11 @@ def save_preds(run_deg_kf_test, config, model, train_conv, tf, ys, sim_objs, out
             return None
         else:
 
-            print("here in needle_in_haystack_preds")
-
             needle_in_haystack_preds(config, model, ckpt_steps, parent_parent_dir, errs_dir, train_conv, ys, sim_objs)
             return None
 
 
     else:
-
-        print("here in compute_errors")
         err_lss, irreducible_error = compute_errors(config, config.C_dist, run_deg_kf_test,
                                                 wentinn_data=False, tf=tf)
 
@@ -2363,7 +2353,6 @@ def setup_deg_kf_axs_arrs(num_systems):
 
 def create_plots(config, model, run_preds, run_deg_kf_test, excess, num_systems, shade, logscale, train_conv, tf, ys, sim_objs, output_dir, run_kf_ols=True):
 
-    print("\n\n\n IN create_plots\n\n\n")
     C_dist = config.C_dist
     
     if excess:
@@ -2374,7 +2363,6 @@ def create_plots(config, model, run_preds, run_deg_kf_test, excess, num_systems,
         # print("config path:", config.ckpt_path)
         save_preds(run_deg_kf_test, config, model, train_conv, tf, ys, sim_objs, output_dir, run_kf_ols=run_kf_ols)  # save the predictions to a file
 
-        print("in run_preds")
         if train_conv:
             return None
 
