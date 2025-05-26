@@ -2663,6 +2663,8 @@ if __name__ == '__main__':
     parser.add_argument('--hard_coded_ckpt', type=int, help="Integer. hard-code what ckpt to use for needle plots", default=None)
     parser.add_argument('--multi_cut_val', help='Boolean. run the multi cut validation experiment data gen', action='store_true')
     parser.add_argument('--dataset_typ', type=str, help='Name of the datasource to use', default=None)
+    parser.add_argument('--all_steps_in', help='Boolean. compute all the steps in', action='store_true')
+    
 
 
 
@@ -2745,6 +2747,8 @@ if __name__ == '__main__':
     multi_cut_val = args.multi_cut_val
     # print("dataset_typ arg", args.dataset_typ)
     dataset_typ = args.dataset_typ
+    # print("all_steps_in arg", args.all_steps_in)
+    all_steps_in = args.all_steps_in
 
 
 
@@ -2929,7 +2933,10 @@ if __name__ == '__main__':
 
             # steps_in = [1,2,3,5,10]
             # steps_in = [1,2,3,7,8]
-            steps_in = list(range(1,9))
+            if all_steps_in:
+                steps_in = list(range(1,9))
+            else:
+                steps_in = [1,2,3,7,8]
 
             colors=['#000000', '#005CAB', '#E31B23', '#FFC325', '#00A651', '#9B59B6']
         
