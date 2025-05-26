@@ -802,25 +802,25 @@ def gen_ckpt_pred_steps(model_name): #change this function to use the model name
         # ckpt_pred_steps = [1000,2000]
 
     elif model_name == "ortho_haar_big":
-        # minval = 1000
-        # maxval = 135000
-        # train_int = 1000
-
-        # phases = [minval, 8000, 50000, maxval]
-
-        # ckpt_pred_steps = gen_pred_ckpts(minval, maxval, train_int, phases, hande_code_scale=False)
-        # print(ckpt_pred_steps)
-        # print(len(ckpt_pred_steps))
-
         minval = 1000
-        maxval = 121000
+        maxval = 135000
         train_int = 1000
 
-        phases = [minval, 10000, 52000, maxval]
+        phases = [minval, 8000, 50000, maxval]
 
         ckpt_pred_steps = gen_pred_ckpts(minval, maxval, train_int, phases, hande_code_scale=False)
         print(ckpt_pred_steps)
         print(len(ckpt_pred_steps))
+
+        # minval = 1000
+        # maxval = 121000
+        # train_int = 1000
+
+        # phases = [minval, 10000, 52000, maxval]
+
+        # ckpt_pred_steps = gen_pred_ckpts(minval, maxval, train_int, phases, hande_code_scale=False)
+        # print(ckpt_pred_steps)
+        # print(len(ckpt_pred_steps))
     
     elif model_name == "ortho_haar_big_mask_backstory":
         minval = 33000

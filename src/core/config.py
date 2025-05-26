@@ -19,7 +19,7 @@ class Config(object, metaclass=Singleton):
     # Dataset settings
     num_tasks = 40000 #number of training systems
     num_val_tasks = 50 #number of test systems
-    dataset_typ = "ident" #"unifA" #"gaussA" #"gaussA_noscale" #"rotDiagA" #"rotDiagA_unif" #"rotDiagA_gauss" #"upperTriA" #"single_system" #"cond_num" #"upperTriA_gauss" #"ident" #"ortho" #"ortho_haar" #"ortho_sync"
+    dataset_typ = "ortho_haar"#"unifA" #"gaussA" #"gaussA_noscale" #"rotDiagA" #"rotDiagA_unif" #"rotDiagA_gauss" #"upperTriA" #"single_system" #"cond_num" #"upperTriA_gauss" #"ident" #"ortho" #"ortho_haar" #"ortho_sync"
     max_cond_num = 100
     distinct_cond_nums = 10
     val_dataset_typ = "ortho_haar"#"unifA" #"gaussA" #"gaussA_noscale" #"rotDiagA" #"rotDiagA_unif" #"rotDiagA_gauss" #"upperTriA" #"single_system" #"cond_num" #"ident" #"ortho" #"ortho_haar" #"ortho_sync"
