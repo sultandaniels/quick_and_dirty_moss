@@ -12,6 +12,7 @@ import torch
 import gc
 from core.config import Config
 from data_train import set_config_params, gen_ckpt_pred_steps
+import time
 
 
 
@@ -414,4 +415,81 @@ def plot_haystack_train_conv_pretrain_x_axis(config, colors, fin_quartiles_ckpt,
 
 
 if __name__ == "__main__":
-    print("Running pretrain_loss.py as a script")
+    fig,ax = plt.subplots(1, 1, figsize=(6, 4))
+
+    config = Config()
+
+    colors = ['#000000', '#005CAB', '#E31B23', '#FFC325', '#00A651', '#9B59B6']
+
+    start = time.time()
+    pseudo_pred_stats = {}
+    for datasource in ["val", "train"]:
+        if datasource == "val":
+            label = "Test"
+        else:
+            label = "Train"
+        pseudo_pred_avg, pseudo_pred_std = compute_pseudo_pred_avg_pipeline(datasource)
+        
+        pseudo_pred_stats[label] = (pseudo_pred_avg, pseudo_pred_std)
+    
+    end = time.time()
+    print(f"Time taken to compute pseudo prediction stats: {(end - start)/60} minutes")
+
+    model_names = ["ortho_haar_tiny", "ortho_haar_small", "ortho_haar_medium_single_gpu", "ortho_haar_big"]
+
+    sizes = ["Tiny-4M", "Small-5.7M", "Medium-9.1M", "Big-20.7M"]
+    model_count = 0
+
+    markers = ["o", "x"]
+    linestyles = ["-", "--"]
+    for model_name in model_names:
+        tf_avg_cong, tf_std_cong, train_exs_cong, output_dir = gen_cong_lsts(config, model_name)
+        count = 0
+
+
+        #capitalize the first letter of each datasource
+        datasources = ["Test"]
+        for tf_avg_lst, tf_std_lst, train_exs in zip(tf_avg_cong, tf_std_cong, train_exs_cong):
+            if count > 0:
+                continue
+            print(f"count: {count}")
+            tf_avg_arr = np.array(tf_avg_lst)
+            tf_std_arr = np.array(tf_std_lst)
+            train_exs_arr = np.array(train_exs)
+            print(f"tf_avg_lst: {tf_avg_lst}")
+            ax.plot(train_exs_arr, tf_avg_arr, color=colors[model_count], linewidth=2, label=f"{sizes[model_count]}: {datasources[count]}", marker=markers[count], linestyle=linestyles[count], markersize=5, zorder=2-count)
+            ax.fill_between(train_exs_arr, tf_avg_arr - tf_std_arr, tf_avg_arr + tf_std_arr, color=colors[model_count], alpha=0.2, zorder=0)
+
+            print(f"pseudo_pred_stats[datasources[count]][0]: {pseudo_pred_stats[datasources[count]][0]}")
+            #plot the pseudo prediction error as a horizontal line
+            count += 1
+
+        if model_count == 2:
+            train_exs_arr_for_pseudo = train_exs_arr
+
+        model_count += 1
+
+
+    ax.plot(train_exs_arr_for_pseudo, pseudo_pred_stats["Test"][0]*np.ones_like(train_exs_arr_for_pseudo), color="black", linewidth=3, label=f"Pseudoinv Predictor", linestyle = ":", zorder=100)
+
+
+
+    ax.set_ylabel("Error")
+    ax.set_xlabel("# of Training Examples")
+    # ax.set_yscale("log")
+    ax.set_xscale("log")
+    ax.legend(loc="upper right", fontsize=8)
+    #set minor yticks every 0.01
+    ax.yaxis.set_minor_locator(plt.MultipleLocator(0.1))
+    #set gridlines
+    ax.grid(which='major', linestyle='--', linewidth=0.5)
+    ax.grid(which='minor', linestyle=':', linewidth=0.5)
+
+
+    fig.tight_layout()
+    time = datetime.now().strftime("%Y-%m-%d_%H")
+    fig_path = f"{output_dir}/figures/multi_cut/pretrain_loss/{model_name}_train_val_loss_cong_{time}.pdf"
+
+    os.makedirs(os.path.dirname(fig_path), exist_ok=True)
+    plt.savefig(fig_path, format='pdf')
+    plt.show()
