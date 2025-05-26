@@ -1,8 +1,16 @@
+import matplotlib.pyplot as plt
+#set font to liberation sans
+plt.rcParams['font.family'] = 'Liberation Serif'
+import numpy as np
+from core import Config
+from data_train import set_config_params
+import os
+import argparse
 
-hay_len = 5
-colors = ['#000000', '#005CAB', '#E31B23', '#FFC325', '#00A651', '#9B59B6']
 
-def plot_init_seg_restart_train_conv(config, output_dir, hay_len):
+
+
+def plot_init_seg_restart_train_conv(config, output_dir, hay_len, colors):
     x_values_path = f"{output_dir}/needles/train_conv/irrelevant_tokens_new_hay_insert_x_values_haystack_len_{hay_len}.npy"
 
     #load the x values npy file
@@ -48,12 +56,31 @@ def plot_init_seg_restart_train_conv(config, output_dir, hay_len):
     # ax.set_ylim([-0.15, 1.1])
     ax.set_yscale("log")
     ax.set_xscale("log")
+    ax.set_xlim([5e5, 1e8])
+    ax.set_ylim([2e-3, 1.5])
 
     # ax.set_xticks(tks)
-    ax.legend(loc="lower left", ncols = 2, columnspacing=0.1, handletextpad=0.5, labelspacing=0.1, fontsize=10)
+    ax.legend(loc="lower left", ncols = 2, columnspacing=0.2, handletextpad=0.5, labelspacing=0.2, fontsize=10)
 
-    fig_path = f"{output_dir}/figures/restart_sys/train_conv/{config.val_dataset_typ}_n_embd_{config.n_embd}_restart_sys_train_conv_{step}_steps_into_seg_{hay_len+1}_log.pdf"
+    fig_path = f"{output_dir}/figures/restart_sys/train_conv/{config.val_dataset_typ}_n_embd_{config.n_embd}_restart_sys_train_conv_all_steps_into_seg_{hay_len+1}_log.pdf"
     os.makedirs(os.path.dirname(fig_path), exist_ok=True)
     fig.tight_layout()
     fig.savefig(fig_path, format='pdf')
     plt.show()
+
+if __name__ == "__main__":
+    hay_len = 5
+    colors = ['#000000', '#005CAB', '#E31B23', '#FFC325', '#00A651', '#9B59B6']
+    parser = argparse.ArgumentParser(description="Plot initial segmentation restart training convergence")
+
+    # model_name = "ortho_haar_medium_single_gpu"
+
+    parser.add_argument("--model_name", type=str, default="ortho_haar_medium_single_gpu", help="Name of the model to use for training")
+
+    args = parser.parse_args()
+    model_name = args.model_name
+
+    config = Config()
+    output_dir, ckpt_dir, experiment_name = set_config_params(config, model_name)
+
+    plot_init_seg_restart_train_conv(config, output_dir, hay_len, colors)
