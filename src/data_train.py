@@ -915,6 +915,7 @@ def predict_all_checkpoints(config, ckpt_dir, output_dir, logscale, ys, sim_objs
     interleave_traces_dict = {}
 
     if config.needle_in_haystack:
+        print(f"needle in haystack: {config.needle_in_haystack}")
         num_exs = config.num_haystack_examples
     else:
         num_exs = 1
@@ -2914,6 +2915,7 @@ if __name__ == '__main__':
             config.override("val_dataset_typ", "ortho_sync")
 
         if multi_haystack:
+            config.override("needle_in_haystack", True)
         
             if ortho_haar:
                 config.override("val_dataset_typ", "ortho_haar")
