@@ -978,6 +978,7 @@ def predict_all_checkpoints(config, ckpt_dir, output_dir, logscale, ys, sim_objs
     
     ckpt_pred_steps = gen_ckpt_pred_steps(model_name) #generate specific ckpt steps to predict on
     print(f"len of ckpt_pred_steps: {len(ckpt_pred_steps)}")
+    print(f"ckpt_pred_steps: {ckpt_pred_steps}\n\n\n")
 
     run_kf_ols = True
     for filename in os.listdir(ckpt_dir + "/checkpoints/"):
