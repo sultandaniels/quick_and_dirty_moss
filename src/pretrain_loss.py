@@ -238,9 +238,9 @@ def format_scientific(x):
     # Remove leading zeros in the exponent part
     return s.replace('e-0', 'e-').replace('e+0', 'e+')
 
-def plot_haystack_train_conv_pretrain_x_axis(config, colors, fin_quartiles_ckpt, beg_quartiles_ckpt, x_values_orig, train_exs_cong, tf_avg_cong, matching_indices, haystack_len, experiment, steps, nope, abs_err=False, finals=True, fig=None, ax=None, model_count=None, size=None):
+def plot_haystack_train_conv_pretrain_x_axis(config, colors, fin_quartiles_ckpt, beg_quartiles_ckpt, x_values_orig, train_exs_cong, tf_avg_cong, matching_indices, haystack_len, experiment, steps, nope, abs_err=False, finals=True, fig=None, ax=None, model_count=None, size=None, restart=False):
 
-    markers = ['.','x']
+    markers = ['.','x', '>']
     
 
     #set x_values to be train_exs_cong[0] at the matching indices
@@ -263,7 +263,8 @@ def plot_haystack_train_conv_pretrain_x_axis(config, colors, fin_quartiles_ckpt,
         multi_model = False
     else:
         multi_model = True
-        steps = [1,2]
+        if not restart:
+            steps = [1,2]
 
     early_stop_ind = None
 
@@ -288,7 +289,7 @@ def plot_haystack_train_conv_pretrain_x_axis(config, colors, fin_quartiles_ckpt,
             col_count = 0
             for step in steps:
 
-                if not multi_model:
+                if fig is None and ax is None:
                     col_ind = col_count
                 else:
                     col_ind = model_count
@@ -315,8 +316,15 @@ def plot_haystack_train_conv_pretrain_x_axis(config, colors, fin_quartiles_ckpt,
                     # raise NotImplementedError("Check the early stop index")
                 
                 if finals:
-                    print(f"col_ind: {col_ind}, step: {step}")
-                    ax.scatter(x_values, qs[1], label=f"{size}: {step} after final" if size is not None else f"{key_lab}: {step}{final_lab_suffix}", s=25,marker=markers[step - 1] if size is not None else ".", zorder=5 if key == "MOP" else 0, color=colors[col_ind])
+
+                    if multi_model and not restart:
+                        label = f"{size}: {step} after final"
+                    elif multi_model and restart:
+                        label = f"{size}: {step} steps into seg. {haystack_len + 1}"
+                    else:
+                        label = f"{key_lab}: {step}{final_lab_suffix}"
+
+                    ax.scatter(x_values, qs[1], label=label, s=25,marker=markers[min(2,step - 1)] if size is not None else ".", zorder=5 if key == "MOP" else 0, color=colors[model_count])
                     # if not valA == "gaussA":
                     #     ax.fill_between(x_values, qs[0], qs[2], alpha=0.2, color=colors[col_count])
 
@@ -332,7 +340,7 @@ def plot_haystack_train_conv_pretrain_x_axis(config, colors, fin_quartiles_ckpt,
 
                     beg_qs = np.array(beg_quartiles_ckpt[key][step])
                     beg_qs = np.transpose(beg_qs)
-                    ax.scatter(x_values, qs[1], label=f"{size}: {step} after final" if size is not None else f"{key_lab}: {step}{final_lab_suffix}", s=25, marker=markers[step - 1] if size is not None else ".", zorder=5 if key == "MOP" else 0, color=colors[model_count])
+                    ax.scatter(x_values, qs[1], label=f"{size}: {step} after final" if size is not None else f"{key_lab}: {step}{final_lab_suffix}", s=25, marker=markers[min(2,step - 1)] if size is not None else ".", zorder=5 if key == "MOP" else 0, color=colors[model_count])
                 # #set the color to the same as the fin quartiles
                 # ax.plot(x_values, beg_qs[1], label=f"{key_lab}: {step}{beg_lab_suffix}", markersize=1 if "OLS" in key_lab else 5, marker="x", color=color, linestyle="-" if "OLS_ir" in key_lab else (":" if "OLS_analytical" in key_lab else "--"), linewidth=5 if "OLS_analytical" in key_lab else 2)
 
@@ -357,7 +365,6 @@ def plot_haystack_train_conv_pretrain_x_axis(config, colors, fin_quartiles_ckpt,
 
     if not multi_model:
         ax.invert_xaxis()
-        
     ax.set_xlabel("Pretraining Error", fontsize=14)
     ax.set_ylabel(f"Error " + ("Ratio" if valA == "gaussA" and not abs_err else ""), fontsize=14)
     if finals:
@@ -403,14 +410,18 @@ def plot_haystack_train_conv_pretrain_x_axis(config, colors, fin_quartiles_ckpt,
     # fig_len.tight_layout()
     
     if multi_model:
-        if model_count < 3:
+        if not (model_count == 3 and restart):
             return early_stop_ind
         
+    print("saving figure")
     fig.savefig(figure_dir + ("backstory_" if config.backstory and config.mem_suppress else ("init_seg_" if config.init_seg and config.mem_suppress else "")) + ("masked_" if config.masking and config.mem_suppress else ("unmasked_" if not config.masking and config.mem_suppress else "")) + ("fix_needle_" if config.fix_needle else "") + ("opposite_ortho_" if config.opposite_ortho else "") + ("irrelevant_tokens_" if config.irrelevant_tokens else "") + ("same_tokens_" if config.same_tokens else "")+ ("paren_swap_" if config.paren_swap else "") + ("zero_cut_" if config.zero_cut else "") + ("new_hay_insert_" if config.new_hay_insert else "") + (f"late_start_{config.late_start}_" if config.late_start is not None else "") + ("abs_err_" if abs_err else "") + f"{valA}_embd_dim_{config.n_embd}_train_conv_pretrain_x_axis_all_models_haystack_len_{haystack_len}_{timestamp}_" + ("logscale" if finals else "linearscale") + ".pdf", transparent=True, format="pdf")
+    if model_count == 3 and restart:
+        plt.show()
+        
     
     # fig_len.savefig(figure_dir + ("backstory_" if config.backstory and config.mem_suppress else ("init_seg_" if config.init_seg and config.mem_suppress else "")) + ("masked_" if config.masking and config.mem_suppress else ("unmasked_" if not config.masking and config.mem_suppress else "")) + ("fix_needle_" if config.fix_needle else "") + ("opposite_ortho_" if config.opposite_ortho else "") + ("irrelevant_tokens_" if config.irrelevant_tokens else "") + ("same_tokens_" if config.same_tokens else "")+ ("paren_swap_" if config.paren_swap else "") + ("zero_cut_" if config.zero_cut else "") + ("new_hay_insert_" if config.new_hay_insert else "") + (f"late_start_{config.late_start}_" if config.late_start is not None else "") + ("abs_err_" if abs_err else "") + f"{valA}_embd_dim_{config.n_embd}_train_conv_pretrain_x_axis_haystack_len_{haystack_len}_{timestamp}_linearscale.pdf", transparent=True, format="pdf")
 
-    plt.show()
+    
     return early_stop_ind
 
 
