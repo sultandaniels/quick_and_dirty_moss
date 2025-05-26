@@ -2670,79 +2670,79 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Now you can use the flag
-    print("saved preds arg", args.saved_preds)
+    # print("saved preds arg", args.saved_preds)
     saved_preds = args.saved_preds
-    print("make preds arg", args.make_preds)
+    # print("make preds arg", args.make_preds)
     make_preds = args.make_preds
     print("tf arg", args.tf)
     tf = args.tf
-    print("resume train arg", args.resume_train)
+    # print("resume train arg", args.resume_train)
     resume_train = args.resume_train
-    print("train conv arg", args.train_conv)
+    # print("train conv arg", args.train_conv)
     train_conv = args.train_conv
-    print("multi_haystack arg", args.multi_haystack)
+    # print("multi_haystack arg", args.multi_haystack)
     multi_haystack = args.multi_haystack
-    print("kfnorm arg", args.kfnorm)
+    # print("kfnorm arg", args.kfnorm)
     kfnorm = args.kfnorm
-    print("olsnorm arg", args.olsnorm)
+    # print("olsnorm arg", args.olsnorm)
     olsnorm = args.olsnorm
-    print("t_conv_plot arg", args.t_conv_plot)
+    # print("t_conv_plot arg", args.t_conv_plot)
     t_conv_plot = args.t_conv_plot
-    print("logscale arg", args.logscale)
+    # print("logscale arg", args.logscale)
     logscale = args.logscale
-    print("logscale_an arg", args.logscale_an)
+    # print("logscale_an arg", args.logscale_an)
     logscale_an = args.logscale_an
-    print("train_mix_dist arg", args.train_mix_dist)
+    # print("train_mix_dist arg", args.train_mix_dist)
     train_mix_dist = args.train_mix_dist
-    print("train_mix_state_dim:", args.train_mix_state_dim)
+    # print("train_mix_state_dim:", args.train_mix_state_dim)
     train_mix_state_dim = args.train_mix_state_dim
-    print("train_mix_C:", args.train_mix_C)
+    # print("train_mix_C:", args.train_mix_C)
     train_mix_C = args.train_mix_C
-    print("part_train_set arg", args.part_train_set)
+    # print("part_train_set arg", args.part_train_set)
     part_train_set = args.part_train_set
-    print("model_name arg", args.model_name)
+    # print("model_name arg", args.model_name)
     model_name = args.model_name
-    print("abs arg", args.abs_err)
+    # print("abs arg", args.abs_err)
     abs_err = args.abs_err
-    print("desktop arg", args.desktop)
+    # print("desktop arg", args.desktop)
     desktop = args.desktop
-    print("datasource arg", args.datasource)
+    # print("datasource arg", args.datasource)
     datasource = args.datasource
-    print("late_start arg", args.late_start)
+    # print("late_start arg", args.late_start)
     late_start = args.late_start
-    print("last_ckpt arg", args.last_ckpt)
+    # print("last_ckpt arg", args.last_ckpt)
     last_ckpt = args.last_ckpt
-    print("zero_cut arg", args.zero_cut)
+    # print("zero_cut arg", args.zero_cut)
     zero_cut = args.zero_cut
-    print("paren_swap arg", args.paren_swap)
+    # print("paren_swap arg", args.paren_swap)
     paren_swap = args.paren_swap
-    print("fix_needle arg", args.fix_needle)
+    # print("fix_needle arg", args.fix_needle)
     fix_needle = args.fix_needle
-    print("opposite_ortho arg", args.opposite_ortho)
+    # print("opposite_ortho arg", args.opposite_ortho)
     opposite_ortho = args.opposite_ortho
-    print("only_needle_pos arg", args.only_needle_pos)
+    # print("only_needle_pos arg", args.only_needle_pos)
     only_needle_pos = args.only_needle_pos
-    print("same_tokens arg", args.same_tokens)
+    # print("same_tokens arg", args.same_tokens)
     same_tokens = args.same_tokens
-    print("irrelevant_tokens arg", args.irrelevant_tokens)
+    # print("irrelevant_tokens arg", args.irrelevant_tokens)
     irrelevant_tokens = args.irrelevant_tokens
-    print("ortho_haar arg", args.ortho_haar)
+    # print("ortho_haar arg", args.ortho_haar)
     ortho_haar = args.ortho_haar
-    print("ortho arg", args.ortho)
+    # print("ortho arg", args.ortho)
     ortho = args.ortho
-    print("only_beg arg", args.only_beg)
+    # print("only_beg arg", args.only_beg)
     only_beg = args.only_beg
-    print("acc arg", args.acc)
+    # print("acc arg", args.acc)
     acc = args.acc
-    print("ortho_sync arg", args.ortho_sync)
+    # print("ortho_sync arg", args.ortho_sync)
     ortho_sync = args.ortho_sync
-    print("new_hay_insert arg", args.new_hay_insert)
+    # print("new_hay_insert arg", args.new_hay_insert)
     new_hay_insert = args.new_hay_insert
-    print("hard_coded_ckpt arg", args.hard_coded_ckpt)
+    # print("hard_coded_ckpt arg", args.hard_coded_ckpt)
     hard_coded_ckpt = args.hard_coded_ckpt
-    print("multi_cut_val arg", args.multi_cut_val)
+    # print("multi_cut_val arg", args.multi_cut_val)
     multi_cut_val = args.multi_cut_val
-    print("dataset_typ arg", args.dataset_typ)
+    # print("dataset_typ arg", args.dataset_typ)
     dataset_typ = args.dataset_typ
 
 

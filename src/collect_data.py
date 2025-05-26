@@ -219,9 +219,10 @@ if __name__ == "__main__":
 
     config.override("multi_cut_val", multi_cut_val)
 
+    config.override("n_positions", 250)
+
     if multi_cut_val:
         config.override("num_val_tasks", 5000)
         config.override("num_traces", {"train": 1, "val": 1})
-        config.override("n_positions", 250)
     
     collect_data(config, "/data/shared/ICL_Kalman_Experiments/train_and_test_data/ortho_haar", only, train_mix_dist, opposite_ortho=opposite_ortho)
