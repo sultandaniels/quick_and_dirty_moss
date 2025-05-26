@@ -218,5 +218,9 @@ if __name__ == "__main__":
     config = Config()
 
     config.override("multi_cut_val", multi_cut_val)
+
+    if multi_cut_val:
+        config.override("num_val_tasks", 2000)
+        config.override("num_traces", {"train": 1, "val": 1})
     
     collect_data(config, "/data/shared/ICL_Kalman_Experiments/train_and_test_data/ortho_haar", only, train_mix_dist, opposite_ortho=opposite_ortho)
