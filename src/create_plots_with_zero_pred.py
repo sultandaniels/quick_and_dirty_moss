@@ -2173,8 +2173,11 @@ def save_preds(run_deg_kf_test, config, model, train_conv, tf, ys, sim_objs, out
     os.makedirs(errs_dir, exist_ok=True)
 
     if train_conv and not config.multi_sys_trace:
+        print("here in compute_errors_conv")
         err_lss, irreducible_error = compute_errors_conv(config)
     elif train_conv and config.multi_sys_trace:
+
+        print("here in needle_in_haystack_preds first cond")
 
         needle_in_haystack_preds(config, model, ckpt_steps, parent_parent_dir, errs_dir, train_conv, ys, sim_objs, run_kf_ols=run_kf_ols)
         return None
@@ -2182,6 +2185,8 @@ def save_preds(run_deg_kf_test, config, model, train_conv, tf, ys, sim_objs, out
 
 
     elif not train_conv and config.multi_sys_trace:
+
+        print("here in multi_sys_trace preds")
         if not config.needle_in_haystack:
             err_lss, sys_choices_per_config, sys_dict_per_config, tok_seg_lens_per_config, seg_starts_per_config = compute_errors_multi_sys(config, tf)
             
@@ -2195,6 +2200,8 @@ def save_preds(run_deg_kf_test, config, model, train_conv, tf, ys, sim_objs, out
                 }, f)
             return None
         else:
+
+            print("here in needle_in_haystack_preds")
 
             needle_in_haystack_preds(config, model, ckpt_steps, parent_parent_dir, errs_dir, train_conv, ys, sim_objs)
             return None
