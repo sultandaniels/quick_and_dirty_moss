@@ -2362,6 +2362,8 @@ def setup_deg_kf_axs_arrs(num_systems):
 
 
 def create_plots(config, model, run_preds, run_deg_kf_test, excess, num_systems, shade, logscale, train_conv, tf, ys, sim_objs, output_dir, run_kf_ols=True):
+
+    print("\n\n\n IN create_plots\n\n\n")
     C_dist = config.C_dist
     
     if excess:
