@@ -1880,6 +1880,8 @@ def compute_errors_needle_or_multi_cut(config, model, sim_objs, errs_dir, errs_l
 
     print(f"\n\nLoading interleaved traces from {interleave_traces_dict_path}\n\n")
 
+    raise Exception("This function is not implemented for multi-cut or needle in haystack yet. Please use the appropriate function for your configuration.")
+
     with open(interleave_traces_dict_path, "rb") as f:
         interleave_traces_dict = pickle.load(f)
         orig_multi_sys_ys = interleave_traces_dict["multi_sys_ys"]
