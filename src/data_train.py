@@ -2103,7 +2103,7 @@ def set_config_params(config, model_name):
 
         # Dataset settings
         config.override("num_tasks", 40000)  # number of training systems
-        config.override("num_val_tasks", 100)  # number of test systems
+        config.override("num_val_tasks", 50)  # number of test systems
         config.override("dataset_typ", "ortho_haar")  # "unifA" #"gaussA" #"gaussA_noscale" #"rotDiagA" #"rotDiagA_unif" #"rotDiagA_gauss" #"upperTriA" #"single_system" #"cond_num" #"upperTriA_gauss" #"ident" #"ortho"
         config.override("max_cond_num", 100)
         config.override("distinct_cond_nums", 10)
@@ -2257,7 +2257,7 @@ def set_config_params(config, model_name):
 
         # Dataset settings
         config.override("num_tasks", 40000)  # number of training systems
-        config.override("num_val_tasks", 100)  # number of test systems
+        config.override("num_val_tasks", 50)  # number of test systems
         config.override("dataset_typ", "ortho_haar")  # "unifA" #"gaussA" #"gaussA_noscale" #"rotDiagA" #"rotDiagA_unif" #"rotDiagA_gauss" #"upperTriA" #"single_system" #"cond_num" #"upperTriA_gauss" #"ident" #"ortho"
         config.override("max_cond_num", 100)
         config.override("distinct_cond_nums", 10)
@@ -2266,7 +2266,7 @@ def set_config_params(config, model_name):
         config.override("nx", 5)
         config.override("ny", 5)
         config.override("n_noise", 1)
-        config.override("num_traces", {"train": 1, "val": 1000})
+        config.override("num_traces", {"train": 1, "val": 100})
         config.override("changing", False)  # used only for plotting
 
         #mem_suppress experiment settings
@@ -2308,7 +2308,7 @@ def set_config_params(config, model_name):
 
         # Dataset settings
         config.override("num_tasks", 40000)  # number of training systems
-        config.override("num_val_tasks", 100)  # number of test systems
+        config.override("num_val_tasks", 50)  # number of test systems
         config.override("dataset_typ", "ortho_haar")  # "unifA" #"gaussA" #"gaussA_noscale" #"rotDiagA" #"rotDiagA_unif" #"rotDiagA_gauss" #"upperTriA" #"single_system" #"cond_num" #"upperTriA_gauss" #"ident" #"ortho"
         config.override("max_cond_num", 100)
         config.override("distinct_cond_nums", 10)
@@ -2317,7 +2317,7 @@ def set_config_params(config, model_name):
         config.override("nx", 5)
         config.override("ny", 5)
         config.override("n_noise", 1)
-        config.override("num_traces", {"train": 1, "val": 1000})
+        config.override("num_traces", {"train": 1, "val": 100})
         config.override("changing", False)  # used only for plotting
 
         #mem_suppress experiment settings
