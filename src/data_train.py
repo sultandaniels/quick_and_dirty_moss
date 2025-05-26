@@ -2871,6 +2871,8 @@ if __name__ == '__main__':
         
     elif train_conv or multi_haystack:
 
+        print("\n\n\n\nis this working?")
+
         kal_step = None
         last_haystack_len = 19
 
