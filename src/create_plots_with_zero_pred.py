@@ -2208,6 +2208,8 @@ def save_preds(run_deg_kf_test, config, model, train_conv, tf, ys, sim_objs, out
 
 
     else:
+
+        print("here in compute_errors")
         err_lss, irreducible_error = compute_errors(config, config.C_dist, run_deg_kf_test,
                                                 wentinn_data=False, tf=tf)
 
