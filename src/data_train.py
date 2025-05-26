@@ -2609,7 +2609,6 @@ def update_dataset_typ(config, dataset_typ):
 # main function
 
 if __name__ == '__main__':
-    wandb.login()
     # Create the parser
     parser = argparse.ArgumentParser(description='Run Predictions or not.')
 
