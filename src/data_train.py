@@ -3134,6 +3134,7 @@ if __name__ == '__main__':
                 
                 # haystack_plots(config, num_sys, output_dir, pred_ckpt_step, kal_step, compute_more=make_preds, abs_err=abs_err)
         else:
+            config.override("needle_in_haystack", False)
 
             if make_preds:
 
