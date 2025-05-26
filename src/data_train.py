@@ -2434,6 +2434,10 @@ def get_entries(config, f):
             [entry["obs"] for entry in samples], axis=0
         ).reshape((num_tasks, num_traces, 251, config.ny)).astype(np.float32)
     else:
+        print(f"len(samples): {len(samples)}")
+        print(f"num_tasks: {num_tasks}")
+        print(f"num_traces: {num_traces}")
+        print(f"config.n_positions: {config.n_positions}")
         ys = np.stack(
             [entry["obs"][:config.n_positions + 1] for entry in samples[:num_tasks*num_traces]], axis=0
         ).reshape((num_tasks, num_traces, config.n_positions + 1, config.ny)).astype(np.float32)
@@ -2453,6 +2457,7 @@ def get_test_data(config, experiment_name, num_haystack_ex=50):
     if (config.datasource == "val"):
 
         path = path + f"/{config.val_dataset_typ}/"
+        print(f"path: {path}")
 
         print(f"getting test data from datasource {config.datasource}")
 
