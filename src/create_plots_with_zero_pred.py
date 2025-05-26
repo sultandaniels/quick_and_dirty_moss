@@ -1876,7 +1876,7 @@ def compute_errors_needle_or_multi_cut(config, model, sim_objs, errs_dir, errs_l
         interleaving = f"multi_cut"
 
     #load multi_sys_ys from interleaved_traces file
-    interleave_traces_dict_path = os.path.join(f"/data/shared/ICL_Kalman_Experiments/train_and_test_data/{dataset_typ}/" + ("backstory_" if config.mem_suppress and config.backstory else "") + ("masked_" if config.mem_suppress and config.masking else "") + ("unmasked_" if config.mem_suppress and not config.masking else "") + f"{config.datasource}_interleaved_traces_{dataset_typ}{config.C_dist}_{interleaving}.pkl")
+    interleave_traces_dict_path = os.path.join(f"/data/shared/ICL_Kalman_Experiments/train_and_test_data/{dataset_typ}/" + ("backstory_" if config.mem_suppress and config.backstory else "") + ("masked_" if config.mem_suppress and config.masking else "") + ("unmasked_" if config.mem_suppress and not config.masking else "") + f"moss_{config.datasource}_interleaved_traces_{dataset_typ}{config.C_dist}_{interleaving}.pkl")
     with open(interleave_traces_dict_path, "rb") as f:
         interleave_traces_dict = pickle.load(f)
         orig_multi_sys_ys = interleave_traces_dict["multi_sys_ys"]

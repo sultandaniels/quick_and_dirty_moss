@@ -802,11 +802,21 @@ def gen_ckpt_pred_steps(model_name): #change this function to use the model name
         # ckpt_pred_steps = [1000,2000]
 
     elif model_name == "ortho_haar_big":
+        # minval = 1000
+        # maxval = 135000
+        # train_int = 1000
+
+        # phases = [minval, 8000, 50000, maxval]
+
+        # ckpt_pred_steps = gen_pred_ckpts(minval, maxval, train_int, phases, hande_code_scale=False)
+        # print(ckpt_pred_steps)
+        # print(len(ckpt_pred_steps))
+
         minval = 1000
-        maxval = 135000
+        maxval = 121000
         train_int = 1000
 
-        phases = [minval, 8000, 50000, maxval]
+        phases = [minval, 10000, 52000, maxval]
 
         ckpt_pred_steps = gen_pred_ckpts(minval, maxval, train_int, phases, hande_code_scale=False)
         print(ckpt_pred_steps)
@@ -915,7 +925,7 @@ def predict_all_checkpoints(config, ckpt_dir, output_dir, logscale, ys, sim_objs
     else:
         interleaving = f"multi_cut"
 
-    interleave_traces_dict_path = os.path.join(f"/data/shared/ICL_Kalman_Experiments/train_and_test_data/{dataset_typ}/{config.datasource}_interleaved_traces_{dataset_typ}{config.C_dist}_{interleaving}.pkl")
+    interleave_traces_dict_path = os.path.join(f"/data/shared/ICL_Kalman_Experiments/train_and_test_data/{dataset_typ}/moss_{config.datasource}_interleaved_traces_{dataset_typ}{config.C_dist}_{interleaving}.pkl")
 
     #check if the file already exists
     if not os.path.exists(interleave_traces_dict_path):
@@ -2403,6 +2413,9 @@ def set_config_params(config, model_name):
     return output_dir, ckpt_dir, experiment_name
 
 def get_entries(config, f):
+
+    print(f"config.datasource: {config.datasource}")
+    print(f"config.num_val_tasks: {config.num_val_tasks}")
     if (config.datasource == "val" or config.datasource == "train_systems"):
         num_traces = config.num_traces["val"]
         if config.datasource == "val":
@@ -2422,8 +2435,12 @@ def get_entries(config, f):
         ).reshape((num_tasks, num_traces, 251, config.ny)).astype(np.float32)
     else:
         ys = np.stack(
-            [entry["obs"][:config.n_positions + 1] for entry in samples], axis=0
+            [entry["obs"][:config.n_positions + 1] for entry in samples[:num_tasks*num_traces]], axis=0
         ).reshape((num_tasks, num_traces, config.n_positions + 1, config.ny)).astype(np.float32)
+
+    print(f"\n\n\nnum_tasks: {num_tasks}")
+    print(f"num_traces: {num_traces}")
+    print(f"shape of ys: {ys.shape}\n\n\n")
     gc.collect()  # Start the garbage collector
     return ys
 
@@ -2867,7 +2884,7 @@ if __name__ == '__main__':
         update_dataset_typ(config, args.dataset_typ)
 
         if multi_cut_val: #set the validation data to be in the format of the training data
-            config.override("num_val_tasks", 40000)
+            config.override("num_val_tasks", 5000)
             config.override("num_traces", {"train": 1, "val": 1})
 
         if config.mem_suppress:

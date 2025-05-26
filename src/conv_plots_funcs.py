@@ -51,7 +51,7 @@ def get_seg_starts_per_config(config, ex=0):
     else:
         interleaving = f"multi_cut"
 
-    interleave_traces_dict_path = os.path.join(f"/data/shared/ICL_Kalman_Experiments/train_and_test_data/{dataset_typ}/{config.datasource}_interleaved_traces_{dataset_typ}{config.C_dist}_{interleaving}.pkl")
+    interleave_traces_dict_path = os.path.join(f"/data/shared/ICL_Kalman_Experiments/train_and_test_data/{dataset_typ}/moss_{config.datasource}_interleaved_traces_{dataset_typ}{config.C_dist}_{interleaving}.pkl")
 
     if os.path.exists(interleave_traces_dict_path):
         with open(interleave_traces_dict_path, "rb") as f:
