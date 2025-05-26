@@ -2438,6 +2438,11 @@ def get_entries(config, f):
         print(f"num_tasks: {num_tasks}")
         print(f"num_traces: {num_traces}")
         print(f"config.n_positions: {config.n_positions}")
+
+        sequence_lengths = [len(entry["obs"]) for entry in samples[:num_tasks*num_traces]]
+        min_length = min(sequence_lengths)
+        max_length = max(sequence_lengths)
+        print(f"Min sequence length: {min_length}, Max sequence length: {max_length}")
         ys = np.stack(
             [entry["obs"][:config.n_positions + 1] for entry in samples[:num_tasks*num_traces]], axis=0
         ).reshape((num_tasks, num_traces, config.n_positions + 1, config.ny)).astype(np.float32)
