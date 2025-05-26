@@ -2457,11 +2457,12 @@ def get_test_data(config, experiment_name, num_haystack_ex=50):
     if (config.datasource == "val"):
 
         path = path + f"/{config.val_dataset_typ}/"
-        print(f"path: {path}")
 
         print(f"getting test data from datasource {config.datasource}")
 
         data_path = path + ("for_multi_cut_" if config.multi_cut_val else "") + ("opposite_ortho_" if config.opposite_ortho else "") + f"val_{config.val_dataset_typ}{config.C_dist}_state_dim_{config.nx}" +("_sync_ind_10" if config.val_dataset_typ == "ortho_sync" else "")
+
+        print(f"data_path: {data_path}")
 
         #check if the data path exists
         if not os.path.exists(data_path + "_sim_objs.pkl"):
