@@ -13,6 +13,7 @@ import gc
 from core.config import Config
 from data_train import set_config_params, gen_ckpt_pred_steps
 import time
+from linalg_helpers import print_matrix
 
 
 
@@ -73,7 +74,7 @@ def gen_cong_lsts(config, model_name):
 
 
 def get_multi_sys_ys(datasource):
-    with open(f"/data/shared/ICL_Kalman_Experiments/train_and_test_data/ortho_haar/{datasource}_interleaved_traces_ortho_haar_ident_C_multi_cut.pkl", "rb") as f:
+    with open(f"/data/shared/ICL_Kalman_Experiments/train_and_test_data/ortho_haar/moss_{datasource}_interleaved_traces_ortho_haar_ident_C_multi_cut.pkl", "rb") as f:
         data = pickle.load(f)
         print(f"data.keys(): {data.keys()}")
         multi_sys_ys = data["multi_sys_ys"][0]
@@ -113,6 +114,7 @@ def pseudo_prediction(history):
 
     pred = Uhat @ history[:,-1]
     # print(f"pred.shape: {pred.shape}")
+    # print(f"pred: {pred}")
     return pred
 
 
@@ -148,6 +150,9 @@ def compute_pseudo_pred_errs(multi_sys_ys, seg_starts_per_config, real_seg_lens_
                 # print(f"segment: {segment}\n")
                 sys_init_ind_dict[current_sys] = segment # add the system to the dictionary with the segment
                 sys_appear.append(current_sys) #append the system to the list of systems that have appeared
+
+                true = multi_sys_ys[conf][0, start_ind, :]
+                errs_conf[0, start_ind] = np.linalg.norm(true)**2 # the 1-after initial prediction is hard-coded to zero
 
                 for ys_ind in range(start_ind+1, end_ind): #generate the pseudo prediction for each ys_ind in the segment and compute the squared error
                     hist = multi_sys_ys[conf][0, start_ind:ys_ind, :].T
