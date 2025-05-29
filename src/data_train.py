@@ -2441,12 +2441,16 @@ def get_entries(config, f):
         print(f"num_traces: {num_traces}")
         print(f"config.n_positions: {config.n_positions}")
 
-        sequence_lengths = [len(entry["obs"]) for entry in samples[:num_tasks*num_traces]]
+        if config.multi_cut_val:
+            num_samples = num_tasks * num_traces
+        else:
+            num_samples = len(samples)
+        sequence_lengths = [len(entry["obs"]) for entry in samples[:num_samples]]
         min_length = min(sequence_lengths)
         max_length = max(sequence_lengths)
         print(f"Min sequence length: {min_length}, Max sequence length: {max_length}")
         ys = np.stack(
-            [entry["obs"][:config.n_positions + 1] for entry in samples[:num_tasks*num_traces]], axis=0
+            [entry["obs"][:config.n_positions + 1] for entry in samples[:num_samples]], axis=0
         ).reshape((num_tasks, num_traces, config.n_positions + 1, config.ny)).astype(np.float32)
 
     print(f"\n\n\nnum_tasks: {num_tasks}")
@@ -2463,7 +2467,7 @@ def get_test_data(config, experiment_name, num_haystack_ex=50):
     path = "/data/shared/ICL_Kalman_Experiments/train_and_test_data"
     if (config.datasource == "val"):
 
-        path = path + f"/{config.val_dataset_typ}/"
+        path = path + f"/{config.val_dataset_typ}/moss_"
 
         print(f"getting test data from datasource {config.datasource}")
 

@@ -15,7 +15,7 @@ from data_train import set_config_params, gen_ckpt_pred_steps
 from get_last_checkpoint import split_path
 from haystack_plots import load_quartiles_ckpt_files
 
-from pretrain_loss import gen_cong_lsts, get_multi_sys_ys, pseudo_prediction, compute_pseudo_pred_errs, compute_pseudo_pred_avg_pipeline, format_scientific, plot_haystack_train_conv_pretrain_x_axis
+from pretrain_loss import gen_cong_lsts, get_multi_sys_ys, pseudo_prediction, compute_pseudo_pred_errs, compute_pseudo_pred_avg_pipeline, format_scientific, plot_haystack_train_conv_pretrain_x_axis, compute_pseudo_pred_errs_needle_in_haystack, save_pseudo_pred_medians, get_multi_sys_ys_needle_in_haystack
 
 
 if __name__ == "__main__":
@@ -49,8 +49,15 @@ if __name__ == "__main__":
 
     config = Config() # Assuming Config is a class that holds the configuration settings
 
-    # markers = ["o", "x"]
-    # linestyles = ["-", "--"]
+    #get the pseudo prediction error medians
+    multi_sys_ys, sys_choices_per_config, seg_starts_per_config, sys_inds_per_config, real_seg_lens_per_config, sys_dict_per_config = get_multi_sys_ys_needle_in_haystack("val", haystack_len, ny=5)
+
+    pseudo_pred_errs = compute_pseudo_pred_errs_needle_in_haystack(multi_sys_ys, seg_starts_per_config, real_seg_lens_per_config, sys_choices_per_config)
+
+    fin_pseudo_pred_med_values = save_pseudo_pred_medians(config, seg_starts_per_config, pseudo_pred_errs, steps_in=np.arange(1, 9), haystack_len=5, ex=0)
+
+
+
     for model_name in model_names:
         tf_avg_cong, tf_std_cong, train_exs_cong, output_dir = gen_cong_lsts(config, model_name) #get pretrain errors
 
@@ -139,5 +146,5 @@ if __name__ == "__main__":
 
             print(f"\n\nSTEPS: {steps}")
 
-            plot_haystack_train_conv_pretrain_x_axis(config, colors, fin_quartiles_ckpt, beg_quartiles_ckpt, x_values, train_exs_cong, tf_avg_cong, matching_indices, haystack_len, experiment, steps=steps, nope=False, abs_err=False, finals=True, fig=fig, ax=ax, model_count=model_count, size=sizes[model_count], restart=restart)
+            plot_haystack_train_conv_pretrain_x_axis(config, colors, fin_quartiles_ckpt, beg_quartiles_ckpt, x_values, train_exs_cong, tf_avg_cong, matching_indices, haystack_len, experiment, steps=steps, nope=False, abs_err=False, finals=True, fig=fig, ax=ax, model_count=model_count, size=sizes[model_count], restart=restart, fin_pseudo_pred_med_values=fin_pseudo_pred_med_values, only_init=True)
         model_count += 1

@@ -1089,15 +1089,7 @@ def populate_val_traces_helper(config, trial, ys_trial, sys_choices=None, sys_di
         count = 0
         for sys in sys_choices:
 
-            if config.new_hay_insert and count == config.num_sys_haystack: #use an unseen systems sequence as the query sequence
-                # if trial == 1:
-                #     print(f"count: {count}, sys: {max(sys_choices) + 1}")
-                sys_trace_obs = ys_trial[max(sys_choices) + 1]
-            else:
-                #get obs from the system trace corresponding to sys_trace_ind
-                sys_trace_obs = ys_trial[sys]
-                # if trial == 1:
-                #     print(f"count: {count}, sys: {sys}")
+            sys_trace_obs = ys_trial[sys]
 
             tok_seg_len = tok_seg_lens[count]
             seg_len = real_seg_lens[count]
@@ -1189,6 +1181,8 @@ def populate_val_traces(config, trace_conf, trial, num_tasks, entries, sys_choic
     # a function to populate the validation traces
     # in order to narrow the error bars, there will be num_trials versions of the same test trace configuration (randomly configured by the leader trace) with different trace realizations
 
+    print(f"entries shape: {entries.shape}, trace_conf: {trace_conf}, trial: {trial}")
+
     ys_trial = entries[:, trial] #get the observations for the first trial
 
     if trial == 0: #if this is the leader trace that sets the system indices, starting indices, and token segment lengths
@@ -1197,11 +1191,15 @@ def populate_val_traces(config, trace_conf, trial, num_tasks, entries, sys_choic
             new_haystack = cycle_list(haystack, 1) #cycle the haystack to the left by 1
             sys_choices = new_haystack + [sys_choices[-1]] #set the new system choices
             segments, sys_choices, sys_dict, tok_seg_lens, real_seg_lens = populate_val_traces_helper(config, trial, ys_trial, sys_choices=sys_choices, sys_dict=sys_dict, tok_seg_lens=tok_seg_lens, real_seg_lens=real_seg_lens, seg_starts=seg_starts, sim_objs=sim_objs)
+            # print("sys_choices after populate val traces helper trial 0:", sys_choices)
 
         else:
             segments, sys_choices, sys_dict, tok_seg_lens, seg_starts, real_seg_lens, sys_inds = populate_traces(config, num_tasks, ys_trial, test=True, train_conv=train_conv, trace_conf=trace_conf, example=ex, sim_objs=sim_objs) #populate the traces for the first trial
+            # print("sys_choices after populate traces:", sys_choices)
     else:
         segments, sys_choices, sys_dict, tok_seg_lens, real_seg_lens = populate_val_traces_helper(config, trial, ys_trial, sys_choices=sys_choices, sys_dict=sys_dict, tok_seg_lens=tok_seg_lens, real_seg_lens=real_seg_lens, seg_starts=seg_starts, sim_objs=sim_objs)
+
+        # print("sys_choices after populate val traces helper:", sys_choices)
   
     return segments, sys_choices, sys_dict, tok_seg_lens, seg_starts, real_seg_lens, sys_inds
 
@@ -2033,6 +2031,7 @@ def interleave_traces(config, ys, num_test_traces_configs, num_trials, ex=None, 
             segments, sys_choices, sys_dict, tok_seg_lens, seg_starts, real_seg_lens, sys_inds = populate_val_traces(config, trace_config, trial, config.num_val_tasks, ys, sys_choices, sys_dict, tok_seg_lens, seg_starts, real_seg_lens, sys_inds, ex=ex, sim_objs=sim_objs) # get the first trace  which will set the testing structure
             multi_sys_ys[trace_config, trial] = segments
         
+        print(f"sys_choices: {sys_choices}")
         sys_choices_per_config.append(sys_choices)
         sys_dict_per_config.append(sys_dict)
         tok_seg_lens_per_config.append(tok_seg_lens)
@@ -2089,6 +2088,7 @@ def needle_in_haystack_preds(config, model, ckpt_steps, parent_parent_dir, errs_
 
     print("err_lss_examples keys:", err_lss_examples.keys())
     print("err_lss_examples['MOP'] shape:", err_lss_examples["MOP"].shape)
+
 
     with open(save_errs_loc + "err_lss_examples.pkl", 'wb') as f:
         pickle.dump(err_lss_examples, f)

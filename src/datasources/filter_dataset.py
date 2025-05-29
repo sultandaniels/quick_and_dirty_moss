@@ -92,7 +92,7 @@ def special_tokens(segment, sys_name, style):
     return start_token, end_token
 
 def populate_traces(config, num_tasks, entries, test=False, train_conv=False, trace_conf=None, example=None, sim_objs=None):
-
+    
     sys_choices = [] #list that will hold the order of the system choices for the trace
     seg_starts = []
     tok_seg_lens = []
@@ -218,7 +218,15 @@ def populate_traces(config, num_tasks, entries, test=False, train_conv=False, tr
             try:
                 if config.new_hay_insert and len(seg_starts) == config.num_sys_haystack + 1: #use an unseen systems sequence as the query sequence
                     # print(f"entry index new insert: {sys_inds[-1] + 1}\n\n")
-                    sys_trace_obs = entries[sys_inds[-1] + 1]
+                    print(f"len(seg_starts): {len(seg_starts)}, config.num_sys_haystack: {config.num_sys_haystack + 1}")
+                    new_sys_ind = sys_inds[-1] + 1
+                    sys_trace_obs = entries[new_sys_ind]
+                    #remove the last element from the sys_choices list
+                    
+                    sys_trace_obs = entries[new_sys_ind]
+                    # remove the last element from sys_choices
+                    sys_choices.pop()
+                    sys_choices.append(new_sys_ind)
                 else:
                     # print(f"entry index: {sys_ind}\n\n")
                     sys_trace_obs = entries[sys_ind]

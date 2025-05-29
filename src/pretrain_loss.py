@@ -14,6 +14,7 @@ from core.config import Config
 from data_train import set_config_params, gen_ckpt_pred_steps
 import time
 from linalg_helpers import print_matrix
+from haystack_plots import comp_quartiles
 
 
 
@@ -92,6 +93,33 @@ def get_multi_sys_ys(datasource):
         print(f"len(sys_inds_per_config): {len(sys_inds_per_config)}")
         print(f"len(real_seg_lens_per_config): {len(real_seg_lens_per_config)}")
     
+    return multi_sys_ys, sys_choices_per_config, seg_starts_per_config, sys_inds_per_config, real_seg_lens_per_config, sys_dict_per_config
+
+
+def get_multi_sys_ys_needle_in_haystack(datasource, hay_len=5, ny=5):
+    #load the interleaved traces val data
+    path = f"/data/shared/ICL_Kalman_Experiments/train_and_test_data/ortho_haar/moss_{datasource}_irrelevant_tokens_new_hay_insert_interleaved_traces_ortho_haar_ident_C_haystack_len_{hay_len}.pkl"
+
+    with open(path, 'rb') as f:
+        data = pickle.load(f)
+        print(f"data.keys(): {data.keys()}")
+        multi_sys_ys = data["multi_sys_ys"]
+        multi_sys_ys = np.take(multi_sys_ys, np.arange(multi_sys_ys.shape[-1] - ny, multi_sys_ys.shape[-1]), axis=-1) #get the true test observations
+        #flatten dim 0 and dim 1 of multi_sys_ys
+        multi_sys_ys = multi_sys_ys.reshape(multi_sys_ys.shape[0] * multi_sys_ys.shape[1], multi_sys_ys.shape[2], multi_sys_ys.shape[3], multi_sys_ys.shape[4]) # (num_examples, num_trials, segment_length, ny)
+        
+        sys_choices_per_config = data["sys_choices_per_config"]
+        seg_starts_per_config = data["seg_starts_per_config"]
+        sys_inds_per_config = data["sys_inds_per_config"]
+        real_seg_lens_per_config = data["real_seg_lens_per_config"]
+        sys_dict_per_config = data["sys_dict_per_config"]
+
+        print(f"multi_sys_ys.shape: {multi_sys_ys.shape}")
+        print(f"len(sys_choices_per_config): {len(sys_choices_per_config)}")
+        print(f"len(seg_starts_per_config): {len(seg_starts_per_config)}")
+        print(f"len(sys_inds_per_config): {len(sys_inds_per_config)}")
+        print(f"len(real_seg_lens_per_config): {len(real_seg_lens_per_config)}")
+
     return multi_sys_ys, sys_choices_per_config, seg_starts_per_config, sys_inds_per_config, real_seg_lens_per_config, sys_dict_per_config
 
 
@@ -214,6 +242,112 @@ def compute_pseudo_pred_errs(multi_sys_ys, seg_starts_per_config, real_seg_lens_
 
     return pseudo_pred_errs
 
+def compute_pseudo_pred_errs_needle_in_haystack(multi_sys_ys, seg_starts_per_config, real_seg_lens_per_config, sys_choices_per_config):
+    pseudo_pred_errs = np.zeros_like(multi_sys_ys[:,:,:,0])
+    print(f"pseudo_pred_errs.shape: {pseudo_pred_errs.shape}")
+
+    for conf in range(multi_sys_ys.shape[0]):
+
+        # print(f"sys_choices_per_config[conf]: {sys_choices_per_config[conf]}")
+
+        errs_conf = np.zeros_like(multi_sys_ys[conf,:,:,0])
+        # print(f"errs_conf.shape: {errs_conf.shape}")
+
+        for trial in range(multi_sys_ys.shape[1]): # loop through each trial in the config
+            sys_init_ind_dict = {} # a dictionary that holds the system indices and how many initial indices have been seen for the config
+
+            sys_appear = [] #holds the system indices that appear in the config
+
+            seg_count = 0
+            for seg in seg_starts_per_config[conf][0]:
+                
+                current_sys = sys_choices_per_config[conf][0][seg_count]
+                # print(f"\n\ncurrent_sys: {current_sys}")
+                if current_sys not in sys_appear: # if the system has not appeared before
+                    start_ind = seg + 1
+                    real_seg_len = real_seg_lens_per_config[conf][0][seg_count]
+                    # print(f"real_seg_len: {real_seg_len}")
+                    end_ind = start_ind + real_seg_len
+                    # print(f"end_ind: {end_ind}")
+                    segment = multi_sys_ys[conf][trial, start_ind:end_ind, :]
+                    # print(f"segment.shape: {segment.shape}")
+                    # print(f"segment.shape: {segment.shape}")
+                    # print(f"segment: {segment}\n")
+                    sys_init_ind_dict[current_sys] = segment # add the system to the dictionary with the segment
+                    sys_appear.append(current_sys) #append the system to the list of systems that have appeared
+
+                    true = multi_sys_ys[conf][trial, start_ind, :]
+                    
+                    errs_conf[trial, start_ind] = np.linalg.norm(true)**2 # the 1-after initial prediction is hard-coded to zero
+
+                    for ys_ind in range(start_ind+1, end_ind): #generate the pseudo prediction for each ys_ind in the segment and compute the squared error
+
+                        # print(f"\n\n\nys_ind: {ys_ind}")
+                        hist = multi_sys_ys[conf][trial, start_ind:ys_ind, :].T
+
+                        pred = pseudo_prediction(hist)
+                        # print(f"pred: {pred}")
+                        # print(f'pred.shape: {pred.shape}')
+                        # print(f"multi_sys_ys[conf][0, ys_ind, :]: {multi_sys_ys[conf][0, ys_ind, :]}")
+                        true = multi_sys_ys[conf][trial, ys_ind, :]
+                        
+                        errs_conf[trial, ys_ind] = np.linalg.norm(pred - true)**2
+
+                        # print(f"errs_conf[0, {ys_ind}, :]: {errs_conf[0, ys_ind, :]}")
+                        # print(f"ys_ind: {ys_ind}")
+                        # print(f"hist.shape: {hist.shape}")
+
+                elif sys_init_ind_dict[current_sys].shape[0] < 6: # still need to see 6 examples of the system
+
+                    print(f"\n\n\nsys_init_ind_dict[current_sys].shape: {sys_init_ind_dict[current_sys].shape}")
+                    
+                    old_seg_len = sys_init_ind_dict[current_sys].shape[0]
+                    # print(f"old segment.shape: {sys_init_ind_dict[current_sys].shape}")
+                    start_ind = seg + 1
+                    # print(f"start_ind: {start_ind}")
+                    real_seg_len = real_seg_lens_per_config[conf][0][seg_count]
+                    # print(f"real_seg_len: {real_seg_len}")
+                    end_ind = start_ind + real_seg_len
+                    # print(f"end_ind: {end_ind}")
+                    segment = multi_sys_ys[conf][trial, start_ind:end_ind, :]
+                    # print(f"new segment.shape: {segment.shape}")
+
+                    segment = np.concatenate((sys_init_ind_dict[current_sys], segment), axis=0) # concatenate the new segment with the old segment
+
+                    # print(f"segment.shape: {segment.shape}")
+                    # print(f"segment: {segment}\n")
+                    sys_init_ind_dict[current_sys] = segment # add the system to the dictionary with the segment
+                    sys_appear.append(current_sys) #append the system to the list of systems that have appeared
+
+                    hist_count = 1
+                    for ys_ind in range(start_ind+1, end_ind): #generate the pseudo prediction for each ys_ind in the segment and compute the squared error
+                        hist = segment[0:old_seg_len + hist_count, :].T
+
+                        print(f"hist.shape: {hist.shape}")
+
+                        pred = pseudo_prediction(hist)
+                        # print(f"hist_count: {hist_count}, pred: {pred}")
+                        # print(f'pred.shape: {pred.shape}')
+                        # print(f"multi_sys_ys[conf][0, ys_ind, :]: {multi_sys_ys[conf][0, ys_ind, :]}")
+                        true = multi_sys_ys[conf][trial, ys_ind, :]
+                        
+                        errs_conf[trial, ys_ind] = np.linalg.norm(pred - true)**2
+
+                        print(f"hist_count: {hist_count}, errs_conf[{trial}, {ys_ind}]: {errs_conf[trial, ys_ind]}, pred: {pred}, true: {true}")
+
+                        # print(f"errs_conf[0, {ys_ind}, :]: {errs_conf[0, ys_ind]}")
+                        # print(f"ys_ind: {ys_ind}")
+                        hist_count += 1
+
+                else: # have already seen 6 examples of the system
+                    pass
+
+                seg_count += 1
+        
+        pseudo_pred_errs[conf] = errs_conf
+
+    return pseudo_pred_errs
+
 
 def compute_avg_std(errs):
     print(f"errs.shape: {errs.shape}")
@@ -227,6 +361,30 @@ def compute_avg_std(errs):
     std = np.std(errs_mean, axis=0) / np.sqrt(errs_mean.shape[0])
     print(f"std.shape: {std.shape}")
     return avg, std
+
+def save_pseudo_pred_medians(config, seg_starts_per_config, pseudo_pred_errs, steps_in = np.arange(1, 9), haystack_len=5, ex=0):
+    pseudo_pred_errs = np.expand_dims(pseudo_pred_errs, axis=1)
+    pseudo_err_exs = {"Pseudo": pseudo_pred_errs}
+    pseudo_quartiles = comp_quartiles(config, pseudo_err_exs)
+
+    seg = haystack_len
+
+    fin_pseudo_pred_med_values = {}
+    for step in steps_in:
+        ind = ind = seg_starts_per_config[ex][0][seg] + step
+        print(f"shape of pseudo_quartiles['Pseudo']: {pseudo_quartiles['Pseudo'].shape}")
+        med_value = pseudo_quartiles["Pseudo"][1, 0, ind] #get the median value for the step in the segment
+        print(f"step: {step}, med_value: {med_value}")
+        fin_pseudo_pred_med_values[step] = med_value
+
+    #save the fin_pseudo_pred_med_values to a pkl file (make path more general later)
+    os.makedirs(f"/data/shared/ICL_Kalman_Experiments/train_and_test_data/ortho_haar/", exist_ok=True)
+    with open(f"/data/shared/ICL_Kalman_Experiments/train_and_test_data/ortho_haar/moss_val_irrelevant_tokens_new_hay_insert_pseudo_pred_medians_ortho_haar_ident_C_haystack_len_{haystack_len}.pkl", 'wb') as f:
+        pickle.dump(fin_pseudo_pred_med_values, f)
+        print(f"Saved fin_pseudo_pred_med_values")
+
+    return fin_pseudo_pred_med_values
+
 
 
 def compute_pseudo_pred_avg_pipeline(datasource):
@@ -243,7 +401,10 @@ def format_scientific(x):
     # Remove leading zeros in the exponent part
     return s.replace('e-0', 'e-').replace('e+0', 'e+')
 
-def plot_haystack_train_conv_pretrain_x_axis(config, colors, fin_quartiles_ckpt, beg_quartiles_ckpt, x_values_orig, train_exs_cong, tf_avg_cong, matching_indices, haystack_len, experiment, steps, nope, abs_err=False, finals=True, fig=None, ax=None, model_count=None, size=None, restart=False):
+def plot_haystack_train_conv_pretrain_x_axis(config, colors, fin_quartiles_ckpt, beg_quartiles_ckpt, x_values_orig, train_exs_cong, tf_avg_cong, matching_indices, haystack_len, experiment, steps, nope, abs_err=False, finals=True, fig=None, ax=None, model_count=None, size=None, restart=False, fin_pseudo_pred_med_values=None, only_init=False):
+
+    if not restart and only_init:
+        return None
 
     markers = ['.','x', '>']
     
@@ -307,6 +468,12 @@ def plot_haystack_train_conv_pretrain_x_axis(config, colors, fin_quartiles_ckpt,
                     if not abs_err:
                         qs -= 1
 
+                if restart:
+                    print(f"qs before subtracting pseudo pred med values: {qs}")
+                    qs -= fin_pseudo_pred_med_values[step]
+                    print(f"qs after subtracting pseudo pred med values: {qs}")
+                    
+
                 # #if key contains OLS then repeat the values in qs to be the length of x_values
                 # if "OLS" in key:
                 #     print(f"key: {key} qs shape: {qs.shape}")
@@ -366,12 +533,13 @@ def plot_haystack_train_conv_pretrain_x_axis(config, colors, fin_quartiles_ckpt,
         closest_ind = np.argmin(np.abs(np.array(train_exs_cong[0]) - (122000*config.batch_size)))
         closest_tf_avg = tf_avg_cong[0][closest_ind]
         #make a vertical line of the closest_tf_avg
-        ax.axvline(x=closest_tf_avg, color="red", linestyle="--", linewidth=1.5)
+        if not only_init:
+            ax.axvline(x=closest_tf_avg, color="red", linestyle="--", linewidth=1.5)
 
     if not multi_model:
         ax.invert_xaxis()
     ax.set_xlabel("Pretraining Error", fontsize=14)
-    ax.set_ylabel(f"Error " + ("Ratio" if valA == "gaussA" and not abs_err else ""), fontsize=14)
+    ax.set_ylabel(f"Error " + (f"- Pseudoinv Baseline Med. Err at step {steps[0]}" if only_init else "") + ("Ratio" if valA == "gaussA" and not abs_err else ""), fontsize=12)
     if finals:
         ax.set_yscale('log')
     else:
@@ -419,7 +587,7 @@ def plot_haystack_train_conv_pretrain_x_axis(config, colors, fin_quartiles_ckpt,
             return early_stop_ind
         
     print("saving figure")
-    fig.savefig(figure_dir + ("backstory_" if config.backstory and config.mem_suppress else ("init_seg_" if config.init_seg and config.mem_suppress else "")) + ("masked_" if config.masking and config.mem_suppress else ("unmasked_" if not config.masking and config.mem_suppress else "")) + ("fix_needle_" if config.fix_needle else "") + ("opposite_ortho_" if config.opposite_ortho else "") + ("irrelevant_tokens_" if config.irrelevant_tokens else "") + ("same_tokens_" if config.same_tokens else "")+ ("paren_swap_" if config.paren_swap else "") + ("zero_cut_" if config.zero_cut else "") + ("new_hay_insert_" if config.new_hay_insert else "") + (f"late_start_{config.late_start}_" if config.late_start is not None else "") + ("abs_err_" if abs_err else "") + f"{valA}_embd_dim_{config.n_embd}_train_conv_pretrain_x_axis_all_models_haystack_len_{haystack_len}_{timestamp}_" + ("logscale" if finals else "linearscale") + ".pdf", transparent=True, format="pdf")
+    fig.savefig(figure_dir + ("only_init_" if only_init else "") + ("backstory_" if config.backstory and config.mem_suppress else ("init_seg_" if config.init_seg and config.mem_suppress else "")) + ("masked_" if config.masking and config.mem_suppress else ("unmasked_" if not config.masking and config.mem_suppress else "")) + ("fix_needle_" if config.fix_needle else "") + ("opposite_ortho_" if config.opposite_ortho else "") + ("irrelevant_tokens_" if config.irrelevant_tokens else "") + ("same_tokens_" if config.same_tokens else "")+ ("paren_swap_" if config.paren_swap else "") + ("zero_cut_" if config.zero_cut else "") + ("new_hay_insert_" if config.new_hay_insert else "") + (f"late_start_{config.late_start}_" if config.late_start is not None else "") + ("abs_err_" if abs_err else "") + f"{valA}_embd_dim_{config.n_embd}_train_conv_pretrain_x_axis_all_models_haystack_len_{haystack_len}_{timestamp}_" + ("logscale" if finals else "linearscale") + ".pdf", transparent=True, format="pdf")
     if model_count == 3 and restart:
         plt.show()
         

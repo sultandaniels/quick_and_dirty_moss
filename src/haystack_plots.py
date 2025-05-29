@@ -399,7 +399,6 @@ def compute_quartiles_ckpt(config, model_name, steps_in, model_dir, experiment, 
     else:
         rat = False
 
-
     if model_name == "ortho_haar":
         errs_dir = model_dir + experiment + f"/prediction_errors{config.C_dist}_step={kal_ckpt}.ckpt"
         errs_loc = errs_dir + f"/train_conv_needle_haystack_len_{haystack_len}_{config.datasource}_" + f"{config.val_dataset_typ}_state_dim_{config.nx}_"  + ("fix_needle_" if config.fix_needle else "") + ("opposite_ortho_" if config.opposite_ortho else "") + ("irrelevant_tokens_" if config.irrelevant_tokens else "") + ("same_tokens_" if config.same_tokens else "")+ ("paren_swap_" if config.paren_swap else "") + ("zero_cut_" if config.zero_cut else "")  + ("new_hay_insert_" if config.new_hay_insert else "")
@@ -722,7 +721,7 @@ def haystack_plots_train_conv_full(config, model_name, haystack_len, output_dir,
 
 
     #plot haystack train conv
-    print(f"fin_quartiles_ckpt: {fin_quartiles_ckpt}, beg_quartiles_ckpt: {beg_quartiles_ckpt}, x_values: {x_values}")
+    # print(f"fin_quartiles_ckpt: {fin_quartiles_ckpt}, beg_quartiles_ckpt: {beg_quartiles_ckpt}, x_values: {x_values}")
     early_stop_ind = plot_haystack_train_conv(config, colors, fin_quartiles_ckpt, beg_quartiles_ckpt, x_values, config.val_dataset_typ, haystack_len, experiment, steps_in, not config.use_pos_emb, abs_err)
 
     print(f"len(pred_ckpt_steps): {len(pred_ckpt_steps)}, early_stop_ind: {early_stop_ind}")
